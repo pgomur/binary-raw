@@ -1,0 +1,136 @@
+<!-- SCREEN: EDITOR
+     Mounted by ui/screens/editor.ts inside #screen-editor.
+
+     IDs that editor.ts looks up with querySelector:
+       .editor         → root element (data-format, data-modified, data-sidebar)
+       #btn-open       → click listener → window.location.reload()
+       #btn-close      → click listener → window.location.reload()
+       #file-tab-name  → textContent ← loadedFile.handle.name
+       #format-badge   → textContent ← loadedFile.structure.format
+       #toolbar        → empty container → mountToolbar()
+       #hex-rows       → container → mountHexView() writes rows here
+       #sidebar        → empty container → mountSidebar()
+       #inspector      → empty container → mountInspector()
+       #status-bar     → empty container → mountStatusBar()
+
+     Component containers are passed empty to mount*().
+     Each mount*() calls container.innerHTML='' and writes its own DOM.
+     The inspector shortcuts are kept as static HTML outside #inspector
+     because inspector.ts does not generate them.
+-->
+<div class="editor" data-format="" data-modified="false" data-sidebar="visible">
+
+  <!-- TOOLBAR
+       Open/Close and the file-tab are static (editor.ts updates
+       their text content and registers listeners). The rest (#toolbar)
+       is populated by mountToolbar() with undo/redo/cols/search.
+  -->
+  <div class="toolbar" id="toolbar-row">
+
+    <!-- Left cluster: navigation -->
+    <button class="nav-btn open-btn" id="btn-open" type="button" title="Open new file">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
+        <line x1="12" y1="11" x2="12" y2="17"/>
+        <line x1="9"  y1="14" x2="15" y2="14"/>
+      </svg>
+      Open
+    </button>
+
+    <!-- Active file tab -->
+    <div class="file-tab">
+      <div class="tab-dot"></div>
+      <!-- editor.ts updates this text with the real filename -->
+      <span class="tab-name" id="file-tab-name">untitled</span>
+    </div>
+
+    <div class="toolbar-sep" aria-hidden="true"></div>
+
+    <!-- Centre zone: mountToolbar() writes its DOM here
+         (undo/redo, export, cols 8/16/32, search input) -->
+    <div id="toolbar" style="display:contents">
+      <!-- mountToolbar() writes here -->
+    </div>
+
+    <!-- Format badge: editor.ts updates the text -->
+    <span class="toolbar-format" id="format-badge">BIN</span>
+
+    <!-- Spacer to push Close to the right -->
+    <span class="toolbar-spacer" aria-hidden="true"></span>
+
+    <div class="toolbar-sep" aria-hidden="true"></div>
+
+    <!-- Right cluster: close -->
+    <button class="nav-btn close-btn" id="btn-close" type="button" title="Close file">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <line x1="18" y1="6"  x2="6"  y2="18"/>
+        <line x1="6"  y1="6"  x2="18" y2="18"/>
+      </svg>
+      Close
+    </button>
+
+  </div>
+  <!-- /toolbar-row -->
+
+  <!-- BODY — three columns: sidebar | hex-view | inspector -->
+  <div class="editor__body">
+
+    <!-- LEFT SIDEBAR
+         mountSidebar() clears this container and writes:
+           div.sidebar
+             div.sidebar__header (.sidebar__title + toggle button)
+             div.sidebar__tree   (section node tree)
+    -->
+    <aside class="sidebar-left" id="sidebar">
+      <!-- mountSidebar() writes here -->
+    </aside>
+
+    <!-- HEX VIEW
+         The column header row is static.
+         #hex-rows is the scroll container where mountHexView()
+         inserts the virtual spacers and .hex-row rows.
+    -->
+    <div class="hex-view">
+
+      <div class="hex-header">
+        <span class="col-label">Offset</span>
+        <span class="col-label" id="hex-header-label">Hex (16 bytes/row)</span>
+        <span class="col-label" style="text-align:right">ASCII</span>
+      </div>
+
+      <!-- mountHexView() writes rows here -->
+      <div class="hex-rows" id="hex-rows" tabindex="0"></div>
+
+    </div>
+    <!-- /hex-view -->
+
+    <!-- RIGHT INSPECTOR SIDEBAR
+         Structure:
+           - panel-title "Inspector" → static, always visible
+           - #inspector → mountInspector() writes dynamic sections here
+           - .inspector-shortcuts → static, always at the bottom
+    -->
+    <aside class="sidebar-right">
+
+      <div class="panel-title">Inspector</div>
+
+      <!-- mountInspector() clears this div and writes its sections -->
+      <div id="inspector" class="inspector-dynamic">
+        <!-- mountInspector() writes here -->
+      </div>
+
+    </aside>
+    <!-- /sidebar-right -->
+
+  </div>
+  <!-- /editor__body -->
+
+  <!-- STATUS BAR
+       mountStatusBar() clears this div and writes its segments.
+  -->
+  <div class="statusbar" id="status-bar">
+    <!-- mountStatusBar() writes here -->
+  </div>
+
+</div>
+<!-- /editor -->

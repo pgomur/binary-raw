@@ -177,7 +177,6 @@ function makeReader(is64: boolean, le: boolean): ElfReader {
  *
  * Both ELF32 and ELF64 formats are supported, as well as little-endian and
  * big-endian data encodings. Field offsets are resolved at parse time via
- * {@link makeReader}.
  *
  * @param buf - Raw ELF image bytes.
  * @returns A {@link ParsedStructure} with `format` set to `'ELF'` and

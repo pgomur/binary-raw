@@ -26,7 +26,7 @@ interface Command {
 
 // Listeners
 
-type ChangeListener = (modifiedCount: number) => void;
+export type ChangeListener = (modifiedCount: number) => void;
 const listeners = new Set<ChangeListener>();
 
 // State

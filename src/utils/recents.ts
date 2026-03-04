@@ -6,7 +6,7 @@
 import type { RecentFileEntry, FileFormat } from '@app-types/index'
 import { Bytes } from '@app-types/index'
 
-import { deleteFileBuffer, StorageError, getDB, STORE_RECENTS } from './storage'
+import { deleteFileBuffer, StorageError, getDB, STORE_RECENTS } from '@utils/storage'
 
 const MAX_RECENTS = 20
 

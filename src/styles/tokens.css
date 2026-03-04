@@ -1,0 +1,17 @@
+/* src/styles/tokens.css */
+:root {
+  --bg:       #0f0f12;
+  --surface:  #18181b;
+  --surface2: #222226;
+  --border:   #2d2d32;
+  --border2:  #3a3a42;
+  --text:     #e8e8ec;
+  --muted:    #6b6b7a;
+  --accent:   #4ade80;
+  --accent2:  #60a5fa;
+  --accent3:  #f59e0b;
+  --accent4:  #a78bfa;
+  --accent5:  #f87171;
+
+  --font-mono: 'IBM Plex Mono', monospace;
+}

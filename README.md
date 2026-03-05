@@ -18,7 +18,7 @@
 <br/>
 <p align="center" >
   <a href="#key-features">Key Features</a> •
-  <a href="#technologies--tools">Installation</a> •
+  <a href="#installation">Installation</a> •
   <a href="#module-architecture">Architecture</a> •
   <a href="#api-documentation">Documentation</a> •
   <a href="#testing">Testing</a>

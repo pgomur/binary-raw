@@ -618,6 +618,37 @@
   letter-spacing: 0.08em;
 }
 
+/* Status Bar Right Group */
+.statusbar-right-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.statusbar-divider {
+  color: var(--border2);
+  user-select: none;
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.statusbar-icon-link {
+  display: flex;
+  align-items: center;
+  color: var(--muted);
+  transition: color 0.15s ease, opacity 0.15s ease;
+  opacity: 0.7;
+}
+
+.statusbar-icon-link:hover {
+  color: var(--text);
+  opacity: 1;
+}
+
+.statusbar-icon-link svg {
+  flex-shrink: 0;
+}
+
 .welcome[data-state="dragging"] .welcome-statusbar {
   border-color: rgba(74, 222, 128, 0.2);
   color: var(--accent);

@@ -14,8 +14,10 @@
     <img src="https://img.shields.io/badge/License-MIT-8A8A8A?style=flat&logo=github&logoColor=white" />
   </a>
 </p>
+
 <br/>
 <p align="center" >
+  <a href="https://binary-raw.pages.dev/">🚀 <strong>Live Demo</strong></a> •
   <a href="#key-features">Key Features</a> •
   <a href="#installation">Installation</a> •
   <a href="#module-architecture">Architecture</a> •
@@ -27,7 +29,11 @@
 Web hex editor for technical binary analysis, developed entirely with TypeScript and native browser APIs. It employs a _Zero-Framework_ architecture to minimize execution overhead and utilizes a virtualized rendering system that enables inspection of large buffers without interface latency, integrating signature-based format detection engines and transactional state management.
 
 <p align="center">
-  <img src="./public/screen_3.png" alt="Binary Raw — Welcome Screen"/>
+  <a href="https://binary-raw.pages.dev/">
+    <img src="./public/screen_3.png" alt="Binary Raw — Welcome Screen"/>
+  </a>
+  <br />
+  <sub>Click on the image to open the live demo</sub>
 </p>
 
 ## Key Features

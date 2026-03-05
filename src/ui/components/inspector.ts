@@ -78,6 +78,10 @@ const CLS = {
   value: "inspector__value",
   valueOriginal: "inspector__value--original",
   valueMono: "inspector__value--mono",
+  valueOffset: "inspector__value--offset",
+  valueInt: "inspector__value--int",
+  valueFloat: "inspector__value--float",
+  valueMeta: "inspector__value--meta",
   bitGrid: "inspector__bit-grid",
   bit: "inspector__bit",
   bitOn: "inspector__bit--on",
@@ -219,21 +223,21 @@ export function mountInspector(container: HTMLElement, options: InspectorOptions
 
     // Offset
     appendSection("Offset", (table) => {
-      appendRow(table, "Hex", `0x${formatOffset(offset)}`);
-      appendRow(table, "Dec", String(offset));
+      appendRow(table, "Hex", `0x${formatOffset(offset)}`, CLS.valueOffset);
+      appendRow(table, "Dec", String(offset), CLS.valueOffset);
     });
 
     // Current byte value (highlighted if modified)
     appendSection(modified ? "Byte (modified ✎)" : "Byte", (table) => {
-      appendRow(table, "Hex", `0x${byteToHex(byte)}`, true, modified);
-      appendRow(table, "Dec", String(byte & 0xff), false, modified);
-      appendRow(table, "Oct", (byte & 0xff).toString(8).padStart(3, "0"), false, modified);
-      appendRow(table, "Binary", (byte & 0xff).toString(2).padStart(8, "0"), true, modified);
-      appendRow(table, "Char", isPrintable(byte) ? String.fromCharCode(byte) : "(non-printable)");
+      appendRow(table, "Hex", `0x${byteToHex(byte)}`, CLS.valueMono, modified);
+      appendRow(table, "Dec", String(byte & 0xff), CLS.valueInt, modified);
+      appendRow(table, "Oct", (byte & 0xff).toString(8).padStart(3, "0"), CLS.valueInt, modified);
+      appendRow(table, "Binary", (byte & 0xff).toString(2).padStart(8, "0"), CLS.valueMono, modified);
+      appendRow(table, "Char", isPrintable(byte) ? String.fromCharCode(byte) : "(non-printable)", CLS.valueInt);
 
       // Original value shown below the current value
       if (modified && original !== undefined) {
-        appendRow(table, "Original", `0x${byteToHex(original)} · ${original & 0xff}`, true, false, true);
+        appendRow(table, "Original", `0x${byteToHex(original)} · ${original & 0xff}`, CLS.valueOriginal, false, true);
       }
     });
 
@@ -278,9 +282,9 @@ export function mountInspector(container: HTMLElement, options: InspectorOptions
 
     // Range info
     appendSection("Selection", (table) => {
-      appendRow(table, "Start", `0x${formatOffset(start)}`);
-      appendRow(table, "End", `0x${formatOffset(end)}`);
-      appendRow(table, "Length", formatSize(length));
+      appendRow(table, "Start", `0x${formatOffset(start)}`, CLS.valueOffset);
+      appendRow(table, "End", `0x${formatOffset(end)}`, CLS.valueOffset);
+      appendRow(table, "Length", formatSize(length), CLS.valueInt);
     });
 
     // Hex preview
@@ -399,10 +403,10 @@ export function mountInspector(container: HTMLElement, options: InspectorOptions
       appendSection(`Modified bytes (${modList.length})`, (table) => {
         const visible = modList.slice(0, 32);
         for (const { offset: off, current, original } of visible) {
-          appendRow(table, `0x${formatOffset(off)}`, `0x${byteToHex(current)} ← was 0x${byteToHex(original)}`, true, true);
+          appendRow(table, `0x${formatOffset(off)}`, `0x${byteToHex(current)} ← was 0x${byteToHex(original)}`, CLS.valueMono, true);
         }
         if (modList.length > 32) {
-          appendRow(table, "…", `+${modList.length - 32} more`);
+          appendRow(table, "…", `+${modList.length - 32} more`, CLS.valueMeta);
         }
       });
     }
@@ -429,18 +433,18 @@ export function mountInspector(container: HTMLElement, options: InspectorOptions
     clearDOM();
 
     appendSection("Section", (table) => {
-      appendRow(table, "Name", node.name);
-      appendRow(table, "Type", node.type);
-      appendRow(table, "Start", `0x${formatOffset(node.range.start)}`);
-      appendRow(table, "End", `0x${formatOffset(node.range.end)}`);
-      appendRow(table, "Size", formatSize(node.range.length));
+      appendRow(table, "Name", node.name, CLS.valueMeta);
+      appendRow(table, "Type", node.type, CLS.valueMeta);
+      appendRow(table, "Start", `0x${formatOffset(node.range.start)}`, CLS.valueOffset);
+      appendRow(table, "End", `0x${formatOffset(node.range.end)}`, CLS.valueOffset);
+      appendRow(table, "Size", formatSize(node.range.length), CLS.valueInt);
 
       if (node.virtualAddr !== undefined) {
-        appendRow(table, "VAddr", `0x${node.virtualAddr.toString(16).toUpperCase()}`);
+        appendRow(table, "VAddr", `0x${node.virtualAddr.toString(16).toUpperCase()}`, CLS.valueOffset);
       }
 
       const flags = [node.flags.readable ? "R" : "-", node.flags.writable ? "W" : "-", node.flags.executable ? "X" : "-"].join("");
-      appendRow(table, "Flags", flags);
+      appendRow(table, "Flags", flags, CLS.valueMeta);
     });
 
     const metaEntries = Object.entries(node.metadata);
@@ -512,11 +516,11 @@ export function mountInspector(container: HTMLElement, options: InspectorOptions
    * @param table    - Target table element.
    * @param label    - Row label (left cell).
    * @param value    - Row value (right cell).
-   * @param mono     - Apply monospace font to the value (default: `false`).
+   * @param valueCls - Specific CSS class for the value cell (default: `null`).
    * @param modified - Highlight the row as a modified byte (default: `false`).
    * @param original - Style the value as the pre-edit original (default: `false`).
    */
-  function appendRow(table: HTMLTableElement, label: string, value: string, mono = false, modified = false, original = false): void {
+  function appendRow(table: HTMLTableElement, label: string, value: string, valueCls: string | null = null, modified = false, original = false): void {
     const tr = document.createElement("tr");
     tr.className = CLS.row;
     if (modified) tr.classList.add(CLS.rowModified);
@@ -529,7 +533,7 @@ export function mountInspector(container: HTMLElement, options: InspectorOptions
     tdValue.className = CLS.value;
     tdValue.textContent = value;
     tdValue.title = value;
-    if (mono) tdValue.classList.add(CLS.valueMono);
+    if (valueCls) tdValue.classList.add(valueCls);
     if (original) tdValue.classList.add(CLS.valueOriginal);
 
     tr.appendChild(tdLabel);
@@ -576,30 +580,30 @@ export function mountInspector(container: HTMLElement, options: InspectorOptions
    */
   function renderInterpretations(table: HTMLTableElement, interp: ByteInterpretations, availableBytes: number): void {
     if (availableBytes >= 1) {
-      if (interp.uint8 !== null) appendRow(table, "uint8", String(interp.uint8), true);
-      if (interp.int8 !== null) appendRow(table, "int8", String(interp.int8), true);
+      if (interp.uint8 !== null) appendRow(table, "uint8", String(interp.uint8), CLS.valueInt);
+      if (interp.int8 !== null) appendRow(table, "int8", String(interp.int8), CLS.valueInt);
     }
     if (availableBytes >= 2) {
-      if (interp.uint16le !== null) appendRow(table, "uint16 LE", String(interp.uint16le), true);
-      if (interp.uint16be !== null) appendRow(table, "uint16 BE", String(interp.uint16be), true);
-      if (interp.int16le !== null) appendRow(table, "int16 LE", String(interp.int16le), true);
-      if (interp.int16be !== null) appendRow(table, "int16 BE", String(interp.int16be), true);
+      if (interp.uint16le !== null) appendRow(table, "uint16 LE", String(interp.uint16le), CLS.valueInt);
+      if (interp.uint16be !== null) appendRow(table, "uint16 BE", String(interp.uint16be), CLS.valueInt);
+      if (interp.int16le !== null) appendRow(table, "int16 LE", String(interp.int16le), CLS.valueInt);
+      if (interp.int16be !== null) appendRow(table, "int16 BE", String(interp.int16be), CLS.valueInt);
     }
     if (availableBytes >= 4) {
-      if (interp.uint32le !== null) appendRow(table, "uint32 LE", String(interp.uint32le), true);
-      if (interp.uint32be !== null) appendRow(table, "uint32 BE", String(interp.uint32be), true);
-      if (interp.int32le !== null) appendRow(table, "int32 LE", String(interp.int32le), true);
-      if (interp.int32be !== null) appendRow(table, "int32 BE", String(interp.int32be), true);
-      if (interp.float32le !== null) appendRow(table, "float32 LE", interp.float32le.toPrecision(7), true);
-      if (interp.float32be !== null) appendRow(table, "float32 BE", interp.float32be.toPrecision(7), true);
+      if (interp.uint32le !== null) appendRow(table, "uint32 LE", String(interp.uint32le), CLS.valueInt);
+      if (interp.uint32be !== null) appendRow(table, "uint32 BE", String(interp.uint32be), CLS.valueInt);
+      if (interp.int32le !== null) appendRow(table, "int32 LE", String(interp.int32le), CLS.valueInt);
+      if (interp.int32be !== null) appendRow(table, "int32 BE", String(interp.int32be), CLS.valueInt);
+      if (interp.float32le !== null) appendRow(table, "float32 LE", interp.float32le.toPrecision(7), CLS.valueFloat);
+      if (interp.float32be !== null) appendRow(table, "float32 BE", interp.float32be.toPrecision(7), CLS.valueFloat);
     }
     if (availableBytes >= 8) {
-      if (interp.float64le !== null) appendRow(table, "float64 LE", interp.float64le.toPrecision(15), true);
-      if (interp.float64be !== null) appendRow(table, "float64 BE", interp.float64be.toPrecision(15), true);
-      if (interp.uint64le !== null) appendRow(table, "uint64 LE", String(interp.uint64le), true);
-      if (interp.uint64be !== null) appendRow(table, "uint64 BE", String(interp.uint64be), true);
-      if (interp.int64le !== null) appendRow(table, "int64 LE", String(interp.int64le), true);
-      if (interp.int64be !== null) appendRow(table, "int64 BE", String(interp.int64be), true);
+      if (interp.float64le !== null) appendRow(table, "float64 LE", interp.float64le.toPrecision(15), CLS.valueFloat);
+      if (interp.float64be !== null) appendRow(table, "float64 BE", interp.float64be.toPrecision(15), CLS.valueFloat);
+      if (interp.uint64le !== null) appendRow(table, "uint64 LE", String(interp.uint64le), CLS.valueInt);
+      if (interp.uint64be !== null) appendRow(table, "uint64 BE", String(interp.uint64be), CLS.valueInt);
+      if (interp.int64le !== null) appendRow(table, "int64 LE", String(interp.int64le), CLS.valueInt);
+      if (interp.int64be !== null) appendRow(table, "int64 BE", String(interp.int64be), CLS.valueInt);
     }
   }
 
@@ -614,17 +618,17 @@ export function mountInspector(container: HTMLElement, options: InspectorOptions
     const format = (d: Date) => d.toISOString().replace("T", " ").replace(/\..+/, "");
     if (interp.uint32le !== null) {
       const d = new Date(interp.uint32le * 1000);
-      if (d.getFullYear() > 1980 && d.getFullYear() < 2100) appendRow(table, "Unix 32 LE", format(d), true);
+      if (d.getFullYear() > 1980 && d.getFullYear() < 2100) appendRow(table, "Unix 32 LE", format(d), CLS.valueOffset);
     }
     if (interp.uint32be !== null) {
       const d = new Date(interp.uint32be * 1000);
-      if (d.getFullYear() > 1980 && d.getFullYear() < 2100) appendRow(table, "Unix 32 BE", format(d), true);
+      if (d.getFullYear() > 1980 && d.getFullYear() < 2100) appendRow(table, "Unix 32 BE", format(d), CLS.valueOffset);
     }
     if (interp.uint64le !== null) {
       // Attempt millisecond interpretation for very large values, otherwise seconds
       const ms = Number(interp.uint64le);
       const d = new Date(ms);
-      if (d.getFullYear() > 1980 && d.getFullYear() < 2100) appendRow(table, "Unix 64 LE", format(d), true);
+      if (d.getFullYear() > 1980 && d.getFullYear() < 2100) appendRow(table, "Unix 64 LE", format(d), CLS.valueOffset);
     }
   }
 
@@ -656,8 +660,8 @@ export function mountInspector(container: HTMLElement, options: InspectorOptions
    */
   function renderEntropy(table: HTMLTableElement, start: AbsoluteOffset, end: AbsoluteOffset): void {
     const res = shannonEntropy(buffer, Range.create(start, end));
-    appendRow(table, "Shannon", `${res.entropy.toFixed(3)} bits`, true);
-    appendRow(table, "Class", res.classification);
+    appendRow(table, "Shannon", `${res.entropy.toFixed(3)} bits`, CLS.valueFloat);
+    appendRow(table, "Class", res.classification, CLS.valueMeta);
   }
 
   /**

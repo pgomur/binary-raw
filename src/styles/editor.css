@@ -421,7 +421,7 @@
   mountSidebar() creates div.sidebar inside it.
 */
 .sidebar-left {
-  width: 300px;
+  width: 290px;
   min-width: 240px;
   flex-shrink: 0;
   overflow: hidden;
@@ -840,6 +840,10 @@
 }
 
 .inspector__value--mono     { color: var(--accent2); }
+.inspector__value--offset   { color: var(--muted); opacity: 0.8; }
+.inspector__value--int      { color: var(--accent3); }
+.inspector__value--float    { color: var(--accent4); }
+.inspector__value--meta     { color: var(--accent2); }
 .inspector__value--original { color: var(--muted); text-decoration: line-through; opacity: 0.5; }
 
 /* Bit grid */

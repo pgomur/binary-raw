@@ -11,6 +11,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "coverage": "vitest run --coverage",
+    "docs": "typedoc",
     "clean": "rm -rf dist"
   },
   "dependencies": {

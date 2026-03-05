@@ -14,17 +14,15 @@
     <img src="https://img.shields.io/badge/License-MIT-8A8A8A?style=flat&logo=github&logoColor=white" />
   </a>
 </p>
-
 <br/>
 <p align="center" >
   <a href="#key-features">Key Features</a> •
   <a href="#installation">Installation</a> •
   <a href="#module-architecture">Architecture</a> •
-  <a href="#api-documentation">Documentation</a> •
-  <a href="#testing">Testing</a>
+  <a href="#documentation">Documentation</a>
 </p>
 
-> ⚠️ **MVP — Minimum Viable Product.** Early functional version.
+> ⚠️ **MVP — Minimum Viable Product.** Early functional version in active development.
 
 Web hex editor for technical binary analysis, developed entirely with TypeScript and native browser APIs. It employs a _Zero-Framework_ architecture to minimize execution overhead and utilizes a virtualized rendering system that enables inspection of large buffers without interface latency, integrating signature-based format detection engines and transactional state management.
 
@@ -85,7 +83,7 @@ Integrated search engine (`search.ts`) that locates arbitrary byte sequences wit
 
 ### Recent Files Management
 
--`recents.ts` module that persists the history of recently opened files via **IndexedDB**, ensuring persistence across browser sessions. Allows quick reopening of previous files from the welcome screen, including file format and size metadata.
+- **Recent Files Management:** `recents.ts` module that persists the history of recently opened files via **IndexedDB**, ensuring persistence across browser sessions. Allows quick reopening of previous files from the welcome screen, including file format and size metadata.
 
 ### Entropy Analysis
 
@@ -93,28 +91,13 @@ Block-level Shannon entropy calculation (`entropy.ts`), useful for identifying p
 
 ## Installation
 
-### Prerequisites
-
-- **Node.js** `>= 18.0.0` (recommended: current LTS)
-- **npm** `>= 9.x`
-- Modern browser with native `ESM` support (Chrome 105+, Firefox 110+, Safari 16+)
-
-> **Windows note:** All project scripts use pure Node.js for filesystem operations (e.g. `clean`), making them fully compatible with CMD, PowerShell, Git Bash, and WSL without any additional tools.
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/pgomur/binary-raw.git
-cd binary-raw
-```
-
-### 2. Install Dependencies
+### 1. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Available Scripts
+### 2. Available Scripts
 
 The project provides several pre-configured commands for the development lifecycle (defined in `package.json`):
 
@@ -150,3 +133,115 @@ npm run docs
 > **Note:** The development server starts at `http://localhost:5173` with `strictPort: true` — if the port is already in use, Vite will throw an error instead of trying another port.
 
 ---
+
+## Module Architecture
+
+The source tree (`/src`) is structured in layers with strictly separated responsibilities:
+
+```
+src/
+├── main.ts                   # Entry point: initializes the app and manages sessionStorage
+├── vite-env.d.ts             # Vite environment declarations
+│
+├── types/
+│   └── index.ts              # Branded Types, domain events, analytical structures
+│
+├── core/
+│   ├── buffer.ts             # In-memory byte buffer management (read / write / patches)
+│   ├── editor.ts             # Editor engine: Undo/Redo command stack, edit state
+│   ├── search.ts             # Byte pattern search engine (hex, ASCII, UTF-8 modes)
+│   ├── selection.ts          # Byte range selection management
+│   └── parsers/
+│       ├── index.ts          # Automatic parser dispatcher by file signature
+│       ├── elf.ts            # ELF parser (sections, program headers, segments)
+│       ├── pe.ts             # PE 32/64-bit parser (DOS header, NT headers, sections)
+│       ├── jpeg.ts           # JPEG parser (EXIF markers, APP0, SOF, DQT)
+│       ├── pdf.ts            # PDF parser (xref table, objects, streams)
+│       ├── png.ts            # PNG parser (IHDR, IDAT, tEXt chunks, metadata)
+│       └── zip.ts            # ZIP parser (central directory, local file headers)
+│
+├── ui/
+│   ├── screens/
+│   │   ├── welcome.html      # Welcome screen HTML template
+│   │   ├── welcome.ts        # Welcome screen logic and file loading
+│   │   ├── editor.html       # Main editor HTML template
+│   │   └── editor.ts         # Editor screen orchestrator (mounts and wires all components)
+│   └── components/
+│       ├── drop-zone.ts      # Drag & drop area for file loading
+│       ├── hex-view.ts       # Virtualized hex view (sliding-window rendering)
+│       ├── inspector.ts      # Inspector panel: on-the-fly byte decoding
+│       ├── sidebar.ts        # Sidebar tree of parsed file sections
+│       ├── status-bar.ts     # Status bar: offset, size, active selection
+│       └── toolbar.ts        # Toolbar: file and edit actions, search input
+│
+├── styles/
+│   ├── tokens.css            # Design tokens: global CSS variables (colors, fonts, spacing)
+│   ├── base.css              # Document reset and base styles
+│   ├── welcome.css           # Welcome screen specific styles
+│   └── editor.css            # Editor and all component styles
+│
+└── utils/
+    ├── encoding.ts           # Encoding/decoding utilities (ASCII, UTF-8)
+    ├── entropy.ts            # Block-level Shannon entropy calculation
+    ├── hex.ts                # Hexadecimal conversion and formatting
+    ├── recents.ts            # Recent files history persistence
+    └── storage.ts            # Abstraction over sessionStorage/localStorage
+```
+
+### Data Flow
+
+The orchestrator is `ui/screens/editor.ts`, which mounts all components and wires the data paths after the file is loaded:
+
+```
+File (File API / Drag & Drop)
+        │
+        ▼
+   buffer.ts ─────────────────────► parsers/index.ts
+   (loads ArrayBuffer)                      │
+        │                         detects format, dispatches
+        │                                   │
+        │                                   ▼
+        │                           ELF / PE / PNG / ...
+        │                                   │
+        │                           SectionNode[]
+        │                                   │
+        ▼                                   ▼
+   editor.ts (core)               sidebar.ts
+   (initEditor: Undo/Redo          (section tree UI)
+    command stack, modified
+    byte cache)
+        │
+        ├──► hex-view.ts
+        │    (renders visible bytes; subscribes to
+        │     onEditorChange for dirty-byte highlights;
+        │     emits pointer events → selection.ts)
+        │
+        ├──► selection.ts
+        │    (tracks active byte range;
+        │     onSelectionChange ──► inspector.ts
+        │                     └──► status-bar.ts)
+        │
+        ├──► inspector.ts
+        │    (decodes selected / hovered bytes on the fly;
+        │     refreshed by onEditorChange for live edits)
+        │
+        ├──► status-bar.ts
+        │    (cursor offset, file size, selection length)
+        │
+        ├──► toolbar.ts
+        │    (column selector, search input)
+        │         │
+        │         └──► search.ts
+        │              (findAll over buffer;
+        │               results → selection.ts + hex-view scroll)
+        │
+        └──► sidebar.ts
+             (section click → inspector.setSection +
+              hex-view.scrollToOffset)
+```
+
+## Documentation
+
+Technical documentation generated from the project's source code using **TypeDoc**.
+
+**Documentation:** [https://pgomur.github.io/binary-raw/index.html](https://pgomur.github.io/binary-raw/index.html)

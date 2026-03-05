@@ -22,7 +22,7 @@
   <a href="#documentation">Documentation</a>
 </p>
 
-> ⚠️ **MVP — Minimum Viable Product.** Early functional version in active development.
+> ⚠️ **MVP — Minimum Viable Product.** Early functional version.
 
 Web hex editor for technical binary analysis, developed entirely with TypeScript and native browser APIs. It employs a _Zero-Framework_ architecture to minimize execution overhead and utilizes a virtualized rendering system that enables inspection of large buffers without interface latency, integrating signature-based format detection engines and transactional state management.
 

@@ -129,6 +129,9 @@ npm run test
 # Run tests once (ideal for CI/CD pipelines)
 npm run test:run
 
+# Open Vitest UI for interactive test inspection in the browser
+npm run test:ui
+
 # Generate code coverage report with V8
 npm run coverage
 
@@ -142,7 +145,7 @@ npm run docs
 
 ## Module Architecture
 
-The source tree (`/src`) is structured in layers with strictly separated responsibilities:
+The source tree (`/src`) and tests (`/tests`) are structured with strictly separated responsibilities:
 
 ```
 src/
@@ -192,6 +195,11 @@ src/
     ├── hex.ts                # Hexadecimal conversion and formatting
     ├── recents.ts            # Recent files history persistence
     └── storage.ts            # Abstraction over sessionStorage/localStorage
+
+tests/                        # Vitest test suites (mirrors /src structure)
+├── core/                     # Core logic tests (buffer, editor, search)
+├── parsers/                  # Format detector and parsing tests
+└── utils/                    # Utility function tests
 ```
 
 ### Data Flow

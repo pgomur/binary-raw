@@ -662,18 +662,64 @@
    RESPONSIVE
    ══════════════════════════════════════════════════════════════ */
 
-/* Tablet */
-@media (max-width: 768px) {
+/* Wide Desktop: optimized readability */
+@media (min-width: 1440px) {
   .recent-panel {
-    width: 220px;
-    min-width: 220px;
+    width: 340px;
+    min-width: 340px;
   }
 }
 
-/* Mobile: hide recents, show only drop zone */
-@media (max-width: 540px) {
+/* Tablet Landscape / Medium Desktop */
+@media (max-width: 1024px) {
   .recent-panel {
-    display: none;
+    width: 240px;
+    min-width: 240px;
+  }
+}
+
+/* Tablet Portrait & Small Screen */
+@media (max-width: 768px) {
+  .recent-panel {
+    width: 200px;
+    min-width: 200px;
+  }
+
+  .drop-label h2 {
+    font-size: 20px;
+  }
+}
+
+/* Mobile: Vertical Stacking (Maintain functionality) */
+@media (max-width: 600px) {
+  .welcome__idle {
+    flex-direction: column; /* Stack top to bottom */
+  }
+
+  .recent-panel {
+    width: 100%;
+    min-width: 0;
+    max-height: 200px; /* Limited height for recents */
+    flex-shrink: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .recent-list {
+    -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  }
+
+  .recent-panel__title {
+    padding: 12px 16px;
+  }
+
+  .drop-zone {
+    flex: 1; /* Drop zone takes remaining space */
+  }
+
+  .drop-zone::after {
+    inset: 16px; /* Tighter border */
   }
 
   .drop-zone__content {
@@ -682,7 +728,31 @@
   }
 
   .drop-label h2 {
-    font-size: 14px;
+    font-size: 18px;
+  }
+
+  .loading-bar {
+    width: min(300px, 80vw);
+  }
+}
+
+/* Extra Small Mobile: maximal compactness */
+@media (max-width: 400px) {
+  .recent-panel {
+    max-height: 160px;
+  }
+
+  .drop-label h2 {
+    font-size: 16px;
+  }
+
+  .drop-label p {
+    font-size: 12px;
+  }
+
+  .format-tag {
+    font-size: 9px;
+    padding: 4px 8px;
   }
 }
 
